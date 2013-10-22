@@ -1,6 +1,7 @@
 package cn.kli.utils;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 
 public class KliUtils {
 	
@@ -10,8 +11,8 @@ public class KliUtils {
 	private KliUtils(Context context){
 		mContext = context;
 		if(mContext != null){
-			String appname = mContext.getApplicationInfo().name;
-			klilog.info(appname);
+			ApplicationInfo info = mContext.getApplicationInfo();
+			String appname = (String) mContext.getPackageManager().getApplicationLabel(info);
 			klilog.setTAG(appname);
 		}
 	}
