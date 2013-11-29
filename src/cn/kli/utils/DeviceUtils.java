@@ -12,12 +12,32 @@ import java.util.regex.Pattern;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 
 public class DeviceUtils {
 	final static private String LOG_TAG = "DeviceUtils";
-
+	
+	private Context mContext;
+    private WindowManager mWinManager;
+	
+	public DeviceUtils(){
+	    mContext = KliUtils.instance().mContext;
+	    init();
+	}
+	
+	public DeviceUtils(Context context){
+	    mContext = context;
+	    init();
+	}
+	
+	private void init(){
+        mWinManager =  (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+	}
+	
 	public static String getFormattedKernelVersion() {
 		String procVersionStr;
 
@@ -71,16 +91,16 @@ public class DeviceUtils {
 
 	public static long getmem_TOLAL() {
 		long mTotal;
-		// ÏµÍ³ÄÚ´æ
+		// ÏµÍ³ï¿½Ú´ï¿½
 		String path = "/proc/meminfo";
-		// ´æ´¢Æ÷ÄÚÈÝ
+		// ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		String content = null;
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(path), 8);
 			String line;
 			if ((line = br.readLine()) != null) {
-				// ²É¼¯ÄÚ´æÐÅÏ¢
+				// ï¿½É¼ï¿½ï¿½Ú´ï¿½ï¿½ï¿½Ï¢
 				content = line;
 			}
 		} catch (FileNotFoundException e) {
@@ -100,9 +120,9 @@ public class DeviceUtils {
 		int begin = content.indexOf(':');
 		// endIndex
 		int end = content.indexOf('k');
-		// ²É¼¯ÊýÁ¿µÄÄÚ´æ
+		// ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½
 		content = content.substring(begin + 1, end).trim();
-		// ×ª»»ÎªIntÐÍ
+		// ×ªï¿½ï¿½ÎªIntï¿½ï¿½
 		mTotal = Integer.parseInt(content);
 		return mTotal;
 	}
@@ -118,9 +138,9 @@ public class DeviceUtils {
 	}
 	
 	/**  
-	* ÒÆ¶¯Êý¾ÝÍøÂç¿ª¹Ø
-	* @param true Îª¿ÉÓÃ falseÎª ²»¿ÉÓÃ  
-	* @return 0Îª ³É¹¦ -1ÎªÊ§°Ü  
+	* ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ç¿ªï¿½ï¿½
+	* @param true Îªï¿½ï¿½ï¿½ï¿½ falseÎª ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  
+	* @return 0Îª ï¿½É¹ï¿½ -1ÎªÊ§ï¿½ï¿½  
 	*/   
 	public static int setMobileDataEnabled(Context context, boolean flag) {
 		ConnectivityManager cm = (ConnectivityManager) context
@@ -138,7 +158,7 @@ public class DeviceUtils {
 	}
 
 	/**
-	 * ¿ÉÓÃÄÚ´æ
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½
 	 * 
 	 * @param mContext
 	 * @return
@@ -148,28 +168,28 @@ public class DeviceUtils {
 				.getSystemService(Context.ACTIVITY_SERVICE);
 		MemoryInfo mi = new MemoryInfo();
 		am.getMemoryInfo(mi);
-		// mi.availMem; µ±Ç°ÏµÍ³µÄ¿ÉÓÃÄÚ
-//		DecimalFormat df = new DecimalFormat("0.00");// ±£Áô2Î»Ð¡Êý
-		return mi.availMem / 1024;// ×ª»¯ÎªKB
+		// mi.availMem; ï¿½ï¿½Ç°ÏµÍ³ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½
+//		DecimalFormat df = new DecimalFormat("0.00");// ï¿½ï¿½ï¿½ï¿½2Î»Ð¡ï¿½ï¿½
+		return mi.availMem / 1024;// ×ªï¿½ï¿½ÎªKB
 	}
 
 	/**
-	 * ×ÜÄÚ´æ
+	 * ï¿½ï¿½ï¿½Ú´ï¿½
 	 * 
 	 * @return
 	 */
 	public static double getTotalMemory() {
 		double mTotal;
-		// ÏµÍ³ÄÚ´æ
+		// ÏµÍ³ï¿½Ú´ï¿½
 		String path = "/proc/meminfo";
-		// ´æ´¢Æ÷ÄÚ
+		// ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½
 		String content = null;
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(path), 8);
 			String line;
 			if ((line = br.readLine()) != null) {
-				// ²É¼¯ÄÚ´æÐÅÏ¢
+				// ï¿½É¼ï¿½ï¿½Ú´ï¿½ï¿½ï¿½Ï¢
 				content = line;
 			}
 		} catch (FileNotFoundException e) {
@@ -189,11 +209,23 @@ public class DeviceUtils {
 		int begin = content.indexOf(':');
 		// endIndex
 		int end = content.indexOf('k');
-		// ²É¼¯ÊýÁ¿µÄÄÚ
+		// ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		content = content.substring(begin + 1, end).trim();
-		// ×ª»»ÎªInt
-		mTotal = Double.parseDouble(content);// µ¥Î»ÎªKB
-//		DecimalFormat df = new DecimalFormat("0.00");// ±£Áô2Î»Ð¡Êý
+		// ×ªï¿½ï¿½ÎªInt
+		mTotal = Double.parseDouble(content);// ï¿½ï¿½Î»ÎªKB
+//		DecimalFormat df = new DecimalFormat("0.00");// ï¿½ï¿½ï¿½ï¿½2Î»Ð¡ï¿½ï¿½
 		return mTotal;
+	}
+	
+	public DisplayMetrics getDisplayMetrics(){
+	    DisplayMetrics metrics = new DisplayMetrics();
+	    mWinManager.getDefaultDisplay().getMetrics(metrics);
+	    return metrics;
+	}
+	
+	public Point getRealSize(){
+	    Point p = new Point();
+	    mWinManager.getDefaultDisplay().getRealSize(p);
+	    return p;
 	}
 }
