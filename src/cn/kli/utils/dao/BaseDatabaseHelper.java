@@ -15,8 +15,8 @@ import cn.kli.utils.dao.DbField.DataType;
 public class BaseDatabaseHelper extends SQLiteOpenHelper {
     private static final klilog LOG = new klilog(BaseDatabaseHelper.class);
 
-    private static final String DATABASE_NAME = "kankan.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final String DATABASE_NAME = "app.db";
+    private static final int DATABASE_VERSION = 1;
 
     private static List<Class<? extends BaseInfo>> mTables = new ArrayList<Class<? extends BaseInfo>>();
 
