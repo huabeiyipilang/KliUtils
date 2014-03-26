@@ -10,6 +10,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.SlidingDrawer;
 import cn.kli.utils.R;
 
 /** 
@@ -51,7 +52,7 @@ public class RoundProgressBar extends View {
     /** 
      * 最大进度 
      */  
-    private int max;  
+    private int max = 100;  
 
     /** 
      * 当前进度 
@@ -65,7 +66,17 @@ public class RoundProgressBar extends View {
     /** 
      * 进度的风格，实心或者空心 
      */  
-    private int style;  
+    private int style;
+    
+    /**
+     * 动画进行中
+     */
+    private boolean animationRunning;
+    
+    /**
+     * 当前进度百分比
+     */
+    private int percent;
 
     public static final int STROKE = 0;  
     public static final int FILL = 1;  
@@ -125,7 +136,6 @@ public class RoundProgressBar extends View {
         paint.setColor(textColor);  
         paint.setTextSize(textSize);  
         paint.setTypeface(Typeface.DEFAULT); //设置字体  
-        int percent = (int)(((float)progress / (float)max) * 100);  //中间的进度百分比，先转换成float在进行除法运算，不然都为0  
         float textWidth = paint.measureText(percent + "%");   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间  
 
         if(textIsDisplayable && percent != 0 && style == STROKE){  
@@ -145,15 +155,15 @@ public class RoundProgressBar extends View {
                 + radius, centre + radius);  //用于定义的圆弧的形状和大小的界限  
 
         switch (style) {  
-        case STROKE:{  
+        case STROKE:{
             paint.setStyle(Paint.Style.STROKE);  
-            canvas.drawArc(oval, 0, 360 * progress / max, false, paint);  //根据进度画圆弧  
+            canvas.drawArc(oval, 0, 360 * percent / 100, false, paint);  //根据进度画圆弧  
             break;  
         }  
         case FILL:{  
             paint.setStyle(Paint.Style.FILL_AND_STROKE);  
             if(progress !=0)  
-                canvas.drawArc(oval, 0, 360 * progress / max, true, paint);  //根据进度画圆弧  
+                canvas.drawArc(oval, 0, 360 * percent / 100, true, paint);  //根据进度画圆弧  
             break;  
         }  
         }  
@@ -189,19 +199,81 @@ public class RoundProgressBar extends View {
      * 刷新界面调用postInvalidate()能在非UI线程刷新 
      * @param progress 
      */  
-    public synchronized void setProgress(int progress) {  
+    public synchronized void setProgress(int progress, boolean anim) {  
         if(progress < 0){  
             throw new IllegalArgumentException("progress not less than 0");  
         }  
         if(progress > max){  
-            progress = max;  
+            progress = max;
+            if(anim){
+                setPercentWithAnim(100);
+            }else{
+                setPercent(100);
+            }
         }  
         if(progress <= max){  
-            this.progress = progress;  
-            postInvalidate();  
+            this.progress = progress;
+            int per = (int)(((float)progress / (float)max) * 100);
+            if(anim){
+                setPercentWithAnim(per);
+            }else{
+                setPercent(per);
+            }
         }  
+    }
+    
+    private synchronized void setPercent(int per){
+        percent = per;
+        postInvalidate();  
+    }
+    
+    /**
+     * 动画效果设置进度
+     * @Title: setProgressWithAnim
+     * @param progress
+     * @return
+     * @return boolean 如果当前动画正在进行的时候设置，返回false，设置失败。
+     * @date 2014-3-26 下午9:50:27
+     */
+    public synchronized boolean setPercentWithAnim(final int per) {
+        if (animationRunning) {
+            return false;
+        } else if (percent == per) {
+            return true;
+        } else {
+            animationRunning = true;
+        }
+        new Thread(){
 
-    }  
+            @Override
+            public void run() {
+                super.run();
+                int from = percent;
+                int to = per;
+                if (from < to) {
+                    for(int p = from; p != to; p++){
+                        setPercentInUIThread(p);
+                    }
+                } else {
+                    for(int p = from; p != to; p--){
+                        setPercentInUIThread(p);
+                    }
+                }
+                animationRunning = false;
+            }
+
+            private void setPercentInUIThread(final int value){
+                setPercent(value);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+        
+        return true;
+    }
 
 
     public int getCricleColor() {  
