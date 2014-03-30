@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
@@ -13,25 +14,13 @@ import cn.kli.utils.klilog;
 import cn.kli.utils.dao.DbField.DataType;
 
 public class BaseDatabaseHelper extends SQLiteOpenHelper {
-    private static final klilog LOG = new klilog(BaseDatabaseHelper.class);
 
-    private static final String DATABASE_NAME = "app.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final klilog LOG = new klilog(BaseDatabaseHelper.class);
 
     private static List<Class<? extends BaseInfo>> mTables = new ArrayList<Class<? extends BaseInfo>>();
 
-    private static BaseDatabaseHelper sInstance = null;
-
-    public static void fini() {
-        sInstance.close();
-        sInstance = null;
-    }
-
-    public static BaseDatabaseHelper getInstance(Context context) {
-        if(sInstance == null){
-            sInstance = new BaseDatabaseHelper(context);
-        }
-        return sInstance;
+    public BaseDatabaseHelper(Context context, String name, CursorFactory factory, int version) {
+        super(context, name, factory, version);
     }
 
     public void close() {
@@ -55,12 +44,8 @@ public class BaseDatabaseHelper extends SQLiteOpenHelper {
         }
     }
     
-    void registerTable(Class<? extends BaseInfo> tableClass){
+    protected void registerTable(Class<? extends BaseInfo> tableClass){
         registerDatabaseTable(tableClass);
-    }
-
-    private BaseDatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     private void dropTable(SQLiteDatabase db, Class<? extends BaseInfo> tableClass) {

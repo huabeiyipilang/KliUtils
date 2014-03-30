@@ -4,7 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -13,6 +15,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import cn.kli.utils.CollectionUtils;
 import cn.kli.utils.klilog;
 
 public class BaseDao<T extends BaseInfo> {
@@ -25,15 +28,15 @@ public class BaseDao<T extends BaseInfo> {
     private int mMaxRowCount;
     private BaseDatabaseHelper mOpenHelper;
 
-    public BaseDao(Context context, Class<T> clazz) {
-        this(context, clazz, -1);
+    public BaseDao(Context context, Class<T> clazz, BaseDatabaseHelper dbHelper) {
+        this(context, clazz, dbHelper, -1);
     }
 
-    public BaseDao(Context context, Class<T> clazz, int maxRowCount) {
+    public BaseDao(Context context, Class<T> clazz, BaseDatabaseHelper dbHelper, int maxRowCount) {
         mClazz = clazz;
         mTableName = BaseInfo.getTableName(clazz);
         mMaxRowCount = maxRowCount;
-        mOpenHelper = BaseDatabaseHelper.getInstance(context);
+        mOpenHelper = dbHelper;
         mOpenHelper.registerTable(clazz);
 
         retrieveFieldInfos();
@@ -288,8 +291,31 @@ public class BaseDao<T extends BaseInfo> {
             values.put(columnName, (Float) field.get(data));
             break;
 
+        case CALENDAR:
+            values.put(columnName, (Long) field.get(data));
+            break;
+            
+        case INTARRAY:
+            int[] intArray = (int[])field.get(data);
+            values.put(columnName, intArray2String(intArray));
+            
         default:
             break;
+        }
+    }
+    
+    private String intArray2String(int[] ints){
+        if(ints == null){
+            return null;
+        }else{
+            String res = "";
+            for(int i = 0; i < ints.length; i++){
+                res += ints[i];
+                if(i != ints.length - 1){
+                    res += ",";
+                }
+            }
+            return res;
         }
     }
 
@@ -342,6 +368,18 @@ public class BaseDao<T extends BaseInfo> {
                 result = cursor.getFloat(columnIndex);
                 break;
 
+            case CALENDAR:
+                Calendar calendar = new GregorianCalendar();
+                calendar.setTimeInMillis(cursor.getLong(columnIndex));
+                result = calendar;
+                break;
+                
+            case INTARRAY:
+                String arrayString = cursor.getString(columnIndex);
+                String[] codes = arrayString.split(",");
+                int[] intArray = CollectionUtils.stringArray2IntArray(codes);
+                result = intArray;
+                
             default:
                 break;
             }

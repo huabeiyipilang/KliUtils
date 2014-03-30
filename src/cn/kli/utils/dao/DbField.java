@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface DbField {
 
     public enum DataType {
-        INTEGER, BIGINT, REAL, TEXT, BLOB
+        INTEGER, BIGINT, REAL, TEXT, BLOB, CALENDAR, INTARRAY
     };
 
     String value() default "";
