@@ -292,7 +292,7 @@ public class BaseDao<T extends BaseInfo> {
             break;
 
         case CALENDAR:
-            values.put(columnName, (Long) field.get(data));
+            values.put(columnName, ((Calendar)field.get(data)).getTimeInMillis());
             break;
             
         case INTARRAY:
